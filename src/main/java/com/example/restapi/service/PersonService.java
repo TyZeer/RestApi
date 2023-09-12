@@ -1,5 +1,6 @@
 package com.example.restapi.service;
 
+import com.example.restapi.model.Book;
 import com.example.restapi.model.Person;
 import com.example.restapi.repos.BookRepos;
 import com.example.restapi.repos.PersonRepos;
@@ -19,6 +20,9 @@ public class PersonService {
     public List<Person> getAll() {
 
         return personRepos.findAll();
+    }
+    public List<Long> getPersonsBook(Long id){
+        return personRepos.getBooks(id);
     }
 
     public Person getById(Long id){

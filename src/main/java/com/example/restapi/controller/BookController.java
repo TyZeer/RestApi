@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
     @Autowired
     private BookService bookService;
+    private PersonService personService;
     @GetMapping("")
     public ResponseEntity<?> getAll() {
         try {
@@ -34,7 +35,7 @@ public class BookController {
     public ResponseEntity<?> getById(@PathVariable Long id) {
 
         try {
-            return new ResponseEntity<>(bookService.getById(id), HttpStatus.OK);
+            return ResponseEntity.ok().body(personService.getById(id));
         }
         catch (Exception e){
             return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
@@ -43,8 +44,9 @@ public class BookController {
         }
     }
 
+
     @PostMapping("")
-    public ResponseEntity<?> createPerson( @Validated @RequestBody Book book) { //ПОпробовать перевести в try catch
+    public ResponseEntity<?> createBook( @Validated @RequestBody Book book) { //ПОпробовать перевести в try catch
         try {
             return new ResponseEntity<>( bookService.create(book),HttpStatus.CREATED);
         }catch (Exception e){
@@ -53,7 +55,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePerson(@PathVariable Long id,@Validated @RequestBody Book book) {
+    public ResponseEntity<?> updateBook(@PathVariable Long id,@Validated @RequestBody Book book) {
         try{
             return new ResponseEntity<>( bookService.update(id, book),HttpStatus.CREATED);
         }
@@ -64,7 +66,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePerson(@PathVariable Long id) {
+    public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         try {
             bookService.delete(id);
            return new ResponseEntity<>(HttpStatus.OK);
@@ -76,26 +78,56 @@ public class BookController {
         }
 
     }
-    @PutMapping("{id}/assign")
-    public ResponseEntity<?> updateOwner(@PathVariable("id") Long id, @RequestBody Long person_id){
+
+
+    @PutMapping("/{bookId}/assign")
+    public ResponseEntity<?> updateBookPerson(@PathVariable Long bookId, @RequestParam(name = "personid") Long personId) {
         try {
-            return new ResponseEntity<>(bookService.setOwner(person_id,id),HttpStatus.CREATED);
+            Book book = bookService.getById(bookId); //Проверять на наличие человека зарание
+            if(book.getPerson_id()==null) {
+                book.setPerson_id(personId);
+                bookService.update(bookId, book);
+                return ResponseEntity.ok("Book person updated successfully");
+            }
+            else
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         }catch (Exception e){
-            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    "Id "+id+" not found"),
-                    HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-    @PutMapping("{id}/release")
-    public ResponseEntity<?> releaseBook(@PathVariable("id") Long id){
+    @PutMapping("/{id}/release")
+    public ResponseEntity<?> releaseBook(@PathVariable Long id){
         try {
-            return new ResponseEntity<>(bookService.releaseBook(id),HttpStatus.CREATED);
+            Book book = bookService.getById(id);
+            book.setPerson_id(null);
+            bookService.update(id,book);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    "Id "+id+" not found"),
-                    HttpStatus.NOT_FOUND);
+            return new  ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+
+
+//    @PutMapping("/{id}/assign")
+//    public ResponseEntity<?> updateOwner(@PathVariable("id") Long id,@RequestParam(name = "person",defaultValue = "1") Long person_id){
+//        try {
+//            return new ResponseEntity<>(bookService.setOwner(person_id,id),HttpStatus.CREATED);
+//        }catch (Exception e){
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
+//    @PutMapping("/{id}/release")
+//    public ResponseEntity<?> releaseBook(@PathVariable("id") Long id){
+//        try {
+//            return new ResponseEntity<>(bookService.releaseBook(id),HttpStatus.CREATED);
+//        }catch (Exception e){
+//            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+//                    "Id "+id+" not found"),
+//                    HttpStatus.NOT_FOUND);
+//        }
+//    }
 
 
 

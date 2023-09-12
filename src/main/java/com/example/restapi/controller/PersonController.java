@@ -29,6 +29,14 @@ public class PersonController {
                     HttpStatus.NOT_FOUND);
         }
     }
+    @GetMapping("/{id}/books")
+    public ResponseEntity<?> getPersonBooks(@PathVariable Long id){
+        try {
+            return new ResponseEntity<>(personService.getPersonsBook(id),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
