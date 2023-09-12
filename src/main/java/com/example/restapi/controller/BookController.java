@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
     @Autowired
     private BookService bookService;
-    private PersonService personService;
     @GetMapping("")
     public ResponseEntity<?> getAll() {
         try {
