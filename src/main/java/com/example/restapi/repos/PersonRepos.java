@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface PersonRepos extends JpaRepository<Person,Long> {
     @Modifying
-    @Query("SELECT id FROM Book where person_id = ?1")
+    @Query("SELECT id FROM Book where person_id = ?1") //этот метод просто имба не работает
     List<Long>getBooks(Long person_id);
 }

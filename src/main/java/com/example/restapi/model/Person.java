@@ -1,15 +1,12 @@
 package com.example.restapi.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Generated;
-import lombok.NonNull;
-import org.antlr.v4.runtime.misc.NotNull;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.List;
 
 @Entity
 @Table(name = "person")
@@ -26,6 +23,9 @@ public class Person {
     @Min(value = 1, message = "You are too small")
     @Max(value = 150, message = "Can not live that long")
     int age;
+    @OneToMany(mappedBy = "person_id")
+    @JsonManagedReference
+    private List<Book> books;
 
 
 }

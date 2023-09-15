@@ -1,15 +1,13 @@
 package com.example.restapi.controller;
-
 import com.example.restapi.errors.AppError;
 import com.example.restapi.model.Book;
 import com.example.restapi.model.Person;
 import com.example.restapi.service.BookService;
 import com.example.restapi.service.PersonService;
-import lombok.RequiredArgsConstructor;
+import com.example.restapi.utils.CustomEntityForBooks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +17,14 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
     @Autowired
     private BookService bookService;
+    private PersonService personService;
+
     @GetMapping("")
     public ResponseEntity<?> getAll() {
         try {
+
             return new ResponseEntity<>(bookService.getAll(), HttpStatus.OK);
+
         }
         catch (Exception e){
             return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
@@ -32,14 +34,16 @@ public class BookController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
-
         try {
-            return ResponseEntity.ok().body(personService.getById(id));
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    "Id "+id+" not found"),
-                    HttpStatus.NOT_FOUND);
+            Book book = bookService.getById(id);
+            Person person = book.getPerson_id();
+            if(person == null){
+                return new ResponseEntity<>(bookService.getById(id),HttpStatus.OK);
+            }
+            CustomEntityForBooks customEntityForBooks1 = new CustomEntityForBooks(book,person);
+            return new ResponseEntity<>(customEntityForBooks1,HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -77,25 +81,19 @@ public class BookController {
         }
 
     }
-
-
-    @PutMapping("/{bookId}/assign")
-    public ResponseEntity<?> updateBookPerson(@PathVariable Long bookId, @RequestParam(name = "personid") Long personId) {
+    @PutMapping("/{id}/assign")
+    public ResponseEntity<?> setOwner(@PathVariable Long id, @RequestParam(name = "person") Long person_id){
         try {
-            Book book = bookService.getById(bookId); //Проверять на наличие человека зарание
-            if(book.getPerson_id()==null) {
-                book.setPerson_id(personId);
-                bookService.update(bookId, book);
-                return ResponseEntity.ok("Book person updated successfully");
-            }
-            else
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
+            Book book = bookService.getById(id);
+            book.setPerson_id(personService.getById(person_id));
+            bookService.update(id,book);
+            return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
     }
-    @PutMapping("/{id}/release")
+    @PutMapping("{id}/release")
     public ResponseEntity<?> releaseBook(@PathVariable Long id){
         try {
             Book book = bookService.getById(id);
@@ -103,10 +101,39 @@ public class BookController {
             bookService.update(id,book);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception e){
-            return new  ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
+
+
+//    @PutMapping("/{bookId}/assign")
+//    public ResponseEntity<?> updateBookPerson(@PathVariable Long bookId, @RequestParam(name = "personid") Long personId) {
+//        try {
+//            Book book = bookService.getById(bookId); //Проверять на наличие человека зарание
+//            if(book.getPerson_id()==null) {
+//                book.setPerson_id();
+//                bookService.update(bookId, book);
+//                return ResponseEntity.ok("Book person updated successfully");
+//            }
+//            else
+//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//
+//        }catch (Exception e){
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
+//    @PutMapping("/{id}/release")
+//    public ResponseEntity<?> releaseBook(@PathVariable Long id){
+//        try {
+//            Book book = bookService.getById(id);
+//            book.setPerson_id(null);
+//            bookService.update(id,book);
+//            return new ResponseEntity<>(HttpStatus.OK);
+//        }catch (Exception e){
+//            return new  ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
 
 
 //    @PutMapping("/{id}/assign")

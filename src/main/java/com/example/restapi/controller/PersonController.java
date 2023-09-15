@@ -1,8 +1,11 @@
 package com.example.restapi.controller;
 
 import com.example.restapi.errors.AppError;
+import com.example.restapi.model.Book;
 import com.example.restapi.model.Person;
 import com.example.restapi.service.PersonService;
+import com.example.restapi.utils.CustomEntityForBooks;
+import com.example.restapi.utils.CustomEntityForPeople;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.example.restapi.model.Book;
 
 ;
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.List;
 public class PersonController {
     @Autowired
     private PersonService personService;
+
     @GetMapping("")
     public ResponseEntity<?> getAll() {
         try {
@@ -29,27 +34,18 @@ public class PersonController {
                     HttpStatus.NOT_FOUND);
         }
     }
-    @GetMapping("/{id}/books")
-    public ResponseEntity<?> getPersonBooks(@PathVariable Long id){
-        try {
-            return new ResponseEntity<>(personService.getPersonsBook(id),HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
 
         try {
-            return new ResponseEntity<>(personService.getById(id), HttpStatus.OK);
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    "Id "+id+" not found"),
-                    HttpStatus.NOT_FOUND);
+            Person person= personService.getById(id);
+            return new ResponseEntity<>(person,HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 
     @PostMapping("")
     public ResponseEntity<?> createPerson( @Validated @RequestBody  Person person) { //ПОпробовать перевести в try catch
